@@ -26,10 +26,6 @@ def detect_faces(image):
         _run_dnn(image, orig_h, orig_w, detected_boxes, face_details)
         _run_profile_haar(image, orig_h, orig_w, detected_boxes, face_details)
 
-    # Body/person detection always runs (YuNet is face-only)
-    _run_hog_all_angles(image, orig_h, orig_w, detected_boxes, face_details)
-    _run_body_haar(image, orig_h, orig_w, detected_boxes, face_details)
-
     # Draw
     result = image.copy()
     for det in face_details:
@@ -137,66 +133,6 @@ def _run_profile_haar(image, orig_h, orig_w, detected_boxes, face_details):
                 _add(detected_boxes, face_details, x1, y1, x2, y2,
                      "FACE", "Haar-Profile-R" if flipped else "Haar-Profile-L",
                      None, orig_w, orig_h)
-
-
-# ── Layer 4: HOG all 4 angles ─────────────────────────────────────────────────
-
-def _run_hog_all_angles(image, orig_h, orig_w, detected_boxes, face_details):
-    """
-    Run HOG at all 4 rotations.
-    0°/180° catch upright/upside-down standing people.
-    90°/270° catch people lying on their side.
-    Threshold 0.5 keeps it tight.
-    """
-    hog = cv2.HOGDescriptor()
-    hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-
-    rotation_map = {
-        0:   image,
-        90:  cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE),
-        180: cv2.rotate(image, cv2.ROTATE_180),
-        270: cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE),
-    }
-
-    for angle, rot_img in rotation_map.items():
-        rects, weights = hog.detectMultiScale(
-            rot_img, winStride=(8, 8), padding=(8, 8), scale=1.05)
-        for i, (x, y, bw, bh) in enumerate(rects if len(rects) else []):
-            conf = float(weights[i]) if i < len(weights) else 0.0
-            if conf < 0.5:
-                continue
-            x1r, y1r, x2r, y2r = _rotate_box_back(
-                x, y, x + bw, y + bh, angle, orig_h, orig_w)
-            x1r = max(0, x1r); y1r = max(0, y1r)
-            x2r = min(orig_w, x2r); y2r = min(orig_h, y2r)
-            if x2r <= x1r or y2r <= y1r:
-                continue
-            if not _overlaps(detected_boxes, x1r, y1r, x2r, y2r, iou_thresh=0.4):
-                label = "HOG" if angle == 0 else f"HOG@{angle}°"
-                _add(detected_boxes, face_details, x1r, y1r, x2r, y2r,
-                     "PERSON", label, conf, orig_w, orig_h)
-
-
-# ── Layer 5: Haar body ────────────────────────────────────────────────────────
-
-def _run_body_haar(image, orig_h, orig_w, detected_boxes, face_details):
-    for path, label in [
-        ("assets/haarcascade_fullbody.xml",  "Full-Body"),
-        ("assets/haarcascade_upperbody.xml", "Upper-Body"),
-    ]:
-        if not os.path.exists(path):
-            continue
-        cc = cv2.CascadeClassifier(path)
-        if cc.empty():
-            continue
-        gray = cv2.equalizeHist(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
-        dets = cc.detectMultiScale(
-            gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 100))
-        for (x, y, bw, bh) in (dets if len(dets) else []):
-            x2, y2 = x + bw, y + bh
-            if not _overlaps(detected_boxes, x, y, x2, y2, iou_thresh=0.4):
-                _add(detected_boxes, face_details, x, y, x2, y2,
-                     "PERSON", f"Haar-{label}", None, orig_w, orig_h)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
