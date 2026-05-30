@@ -148,6 +148,7 @@ def generate_pdf_report(
     contour_areas: list = None,
     techniques_applied: list = None,
     mask_cv=None,
+    case_info: dict = None,
 ) -> bytes:
     """
     Build a full forensic PDF report and return it as bytes
@@ -249,6 +250,45 @@ def generate_pdf_report(
         ("RIGHTPADDING",(0, 0), (-1, -1), 10),
     ]))
     story.append(exec_box)
+
+    # ── Case info block (if provided) ─────────────────────────────────────
+    if case_info and any(case_info.values()):
+        story.append(Spacer(1, 6 * mm))
+        story.append(Paragraph("CASE INFORMATION", S["field_label"]))
+        ci = case_info
+        ci_data = [
+            ["CASE NUMBER",    ci.get("case_number",  "—") or "—",
+             "INCIDENT DATE",  ci.get("incident_date","—") or "—"],
+            ["VICTIM / SUBJECT", ci.get("victim_name","—") or "—",
+             "SUSPECT",        ci.get("suspect_name", "—") or "—"],
+            ["LOCATION",       ci.get("location",     "—") or "—",
+             "INVESTIGATOR",   ci.get("investigator",  "—") or "—"],
+        ]
+        ci_rows = []
+        for row in ci_data:
+            ci_rows.append([
+                Paragraph(row[0], S["field_label"]),
+                Paragraph(row[1], S["field_value"]),
+                Paragraph(row[2], S["field_label"]),
+                Paragraph(row[3], S["field_value"]),
+            ])
+        ci_table = Table(ci_rows, colWidths=[38*mm, 55*mm, 38*mm, 44*mm])
+        ci_table.setStyle(TableStyle([
+            ("BACKGROUND",    (0, 0), (-1, -1), colors.HexColor("#0f0f0f")),
+            ("GRID",          (0, 0), (-1, -1), 0.5, BORDER),
+            ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+            ("TOPPADDING",    (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 6),
+        ]))
+        story.append(ci_table)
+
+        desc = ci.get("scene_description", "")
+        if desc:
+            story.append(Spacer(1, 4 * mm))
+            story.append(Paragraph("SCENE DESCRIPTION", S["field_label"]))
+            story.append(Paragraph(desc, S["narrative"]))
+
     story.append(PageBreak())
  
     # ══════════════════════════════════════════════════════════════════════
