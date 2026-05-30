@@ -19,15 +19,40 @@ def render():
     # ── Force sidebar open + style it ─────────────────────────────────────────
     st.markdown("""
     <style>
-    /* Force sidebar visible on analyze page */
+    /* ── Force sidebar visible ───────────────────────────────────────────── */
     section[data-testid="stSidebar"] {
         display: flex !important;
         width: 320px !important;
         min-width: 320px !important;
     }
-    section[data-testid="stSidebar"] > div {
-        width: 320px !important;
+
+    /* ── Stretch every nested container to full sidebar width ────────────── */
+    /* Streamlit wraps content in several nested divs — target them all */
+    section[data-testid="stSidebar"] > div,
+    section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"],
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"],
+    section[data-testid="stSidebar"] .stVerticalBlock,
+    section[data-testid="stSidebar"] .stSlider,
+    section[data-testid="stSidebar"] .stSelectbox,
+    section[data-testid="stSidebar"] .stCheckbox,
+    section[data-testid="stSidebar"] .stFileUploader,
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] .element-container,
+    section[data-testid="stSidebar"] .stButton {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        flex-shrink: 0 !important;
     }
+
+    /* Remove any padding/margin that compresses content inward */
+    section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
     /* Sidebar toggle button — keep visible */
     button[data-testid="stSidebarNav"] { display: flex !important; }
     button[data-testid="collapsedControl"] { display: flex !important; }
@@ -47,8 +72,73 @@ def render():
         color: #FFD700 !important;
         letter-spacing: 1px !important;
     }
-    section[data-testid="stSidebar"] .stSlider > div > div {
+
+    /* ── Slider: target ONLY the track bar, not the wrapper ─────────────── */
+    /* The track is the last div inside the thumb container */
+    section[data-testid="stSidebar"] [data-testid="stSlider"] > div > div > div {
+        background: transparent !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stSlider"] [role="slider"] {
         background: #CC0000 !important;
+        border-color: #CC0000 !important;
+    }
+    /* The filled portion of the track */
+    section[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stSliderTrack"] > div {
+        background: #CC0000 !important;
+    }
+    /* Unfilled track portion */
+    section[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stSliderTrack"] {
+        background: #333 !important;
+    }
+
+    /* ── File uploader: clean up the dropzone ───────────────────────────── */
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 12px !important;
+    }
+    /* Hide ALL text inside the dropzone — instructions, spans, small print */
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
+        display: none !important;
+    }
+    /* Hide every span/text inside the button */
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button span,
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button p,
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button div {
+        display: none !important;
+    }
+    /* Style the button itself */
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #0d0d0d !important;
+        color: transparent !important;
+        border: 1px solid #FFD700 !important;
+        border-radius: 0 !important;
+        padding: 10px !important;
+        cursor: pointer !important;
+        position: relative !important;
+    }
+    /* Inject "CLICK HERE" as the only visible text */
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button::after {
+        content: "CLICK HERE" !important;
+        font-size: 11px !important;
+        font-family: 'Courier New', monospace !important;
+        letter-spacing: 2px !important;
+        color: #FFD700 !important;
+        display: block !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button:hover {
+        background: #FFD700 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button:hover::after {
+        color: #000 !important;
     }
     section[data-testid="stSidebar"] .stButton > button {
         background: #0d0d0d !important;
