@@ -292,13 +292,24 @@ def render():
             </h1>
             <p class="hero-subtitle">TraceLens — Forensic Digital Evidence Analyzer</p>
             <div class="hero-classified">TOP SECRET // FORENSIC DIVISION // CASE ACTIVE</div>
-            <div class="hero-cta">
-                <a class="cta-btn cta-primary" href="?page=Analyze"> BEGIN ANALYSIS</a>
-                <a class="cta-btn cta-secondary" href="?page=Guide"> HOW IT WORKS</a>
-            </div>
         </div>
     </div>
+    """, unsafe_allow_html=True)
 
+    # Hero CTA buttons using Streamlit navigation
+    col1, col2, col3, col4, col5 = st.columns([1, 1.2, 0.3, 1.2, 1])
+    with col2:
+        if st.button("⚡ BEGIN ANALYSIS", key="hero_analyze", use_container_width=True):
+            st.session_state.current_page = "Analyze"
+            st.session_state["sidebar_expanded"] = True
+            st.rerun()
+    with col4:
+        if st.button("📖 HOW IT WORKS", key="hero_guide", use_container_width=True):
+            st.session_state.current_page = "Guide"
+            st.session_state["sidebar_expanded"] = False
+            st.rerun()
+
+    st.markdown("""
     <!-- Ticker -->
     <div class="ticker-wrap">
         <span class="ticker-text">
@@ -387,10 +398,14 @@ def render():
         <p style="font-family:var(--font-type);font-size:16px;color:#c8c8c8;letter-spacing:2px;font-style:italic;">
             "Every pixel tells a story. Every shadow hides the truth."
         </p>
-        <div style="margin-top:32px;">
-            <a class="cta-btn cta-primary" href="?page=Analyze" style="font-family:var(--font-head);font-size:13px;letter-spacing:3px;text-transform:uppercase;padding:14px 48px;background:var(--blood);color:#fff;border:1px solid var(--blood-bright);text-decoration:none;box-shadow:0 0 30px rgba(139,0,0,0.5);">
-                OPEN THE CASE FILE →
-            </a>
-        </div>
+        <div style="margin-top:32px;" id="case-file-btn-placeholder"></div>
     </div>
     """, unsafe_allow_html=True)
+
+    # Bottom CTA button
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        if st.button("OPEN THE CASE FILE →", key="bottom_analyze", use_container_width=True):
+            st.session_state.current_page = "Analyze"
+            st.session_state["sidebar_expanded"] = True
+            st.rerun()
