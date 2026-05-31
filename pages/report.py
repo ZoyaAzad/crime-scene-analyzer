@@ -63,11 +63,14 @@ def render():
             <p style='font-family:var(--font-mono);font-size:12px;color:white;margin-top:8px;'>
                 Run an analysis on the Analyze page first, then return here to generate the report.
             </p>
-            <a href="?page=Analyze" style="display:inline-block;margin-top:24px;font-family:var(--font-head);font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:12px 36px;background:var(--blood);color:#fff;border:1px solid var(--blood-bright);text-decoration:none;">
-                GO TO ANALYZE →
-            </a>
         </div>
         """, unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("GO TO ANALYZE →", key="report_goto_analyze", use_container_width=True):
+                st.session_state.current_page = "Analyze"
+                st.session_state["sidebar_expanded"] = True
+                st.rerun()
         return
 
     case_info   = st.session_state.get("case_info", {})

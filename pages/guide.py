@@ -200,14 +200,12 @@ def render():
                 <strong>Limitation:</strong> Face detection works best when the face is at least 60x60 pixels. Faces turned completely away cannot be detected by any classical method.
             </div>
         </div>
-        <div style="text-align:center;padding:40px 0;">
-            <a onclick="navigateTo('Analyze')" href="javascript:void(0)"
-               style="font-family:var(--font-head);font-size:13px;letter-spacing:3px;
-                      text-transform:uppercase;padding:14px 48px;background:var(--blood);
-                      color:#fff;border:1px solid var(--blood-bright);text-decoration:none;
-                      box-shadow:0 0 30px rgba(139,0,0,0.4);cursor:pointer;">
-                START ANALYZING →
-            </a>
-        </div>
     </div>
     """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        if st.button("START ANALYZING →", key="guide_analyze", use_container_width=True):
+            st.session_state.current_page = "Analyze"
+            st.session_state["sidebar_expanded"] = True
+            st.rerun()
