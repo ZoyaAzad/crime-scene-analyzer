@@ -51,17 +51,16 @@ def render():
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div style='padding:0 40px;'>", unsafe_allow_html=True)
     tape_divider()
 
     # Check if analysis has been run
     if "last_findings" not in st.session_state:
         st.markdown("""
         <div style='text-align:center;padding:60px;'>
-            <p style='font-family:var(--font-head);font-size:14px;letter-spacing:4px;color:var(--text-dim);text-transform:uppercase;'>
+            <p style='font-family:var(--font-head);font-size:14px;letter-spacing:4px;color:white;text-transform:uppercase;'>
                 No analysis data found
             </p>
-            <p style='font-family:var(--font-mono);font-size:12px;color:#333;margin-top:8px;'>
+            <p style='font-family:var(--font-mono);font-size:12px;color:white;margin-top:8px;'>
                 Run an analysis on the Analyze page first, then return here to generate the report.
             </p>
             <a href="?page=Analyze" style="display:inline-block;margin-top:24px;font-family:var(--font-head);font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:12px 36px;background:var(--blood);color:#fff;border:1px solid var(--blood-bright);text-decoration:none;">
@@ -165,30 +164,22 @@ def render():
         mask_pil = PILImage.open(_io.BytesIO(data)).convert("L")
         mask_decoded = np.array(mask_pil)
 
-    if orig_cv is not None and st.button("📄 GENERATE & DOWNLOAD REPORT"):
-        with st.spinner("Building classified document..."):
-            pdf_bytes = generate_pdf_report(
-                original_cv        = orig_cv,
-                processed_cv       = proc_cv,
-                findings           = findings,
-                filename           = case_info.get("filename", "evidence"),
-                face_details       = face_details if face_details else None,
-                stain_coverage     = coverage,
-                stain_count        = stain_count,
-                contour_count      = st.session_state.get("last_contour_count"),
-                contour_areas      = st.session_state.get("last_contour_areas"),
-                techniques_applied = techniques,
-                mask_cv            = mask_decoded,
-                case_info          = case_info,
-            )
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        case_id = case_info.get("case_number", "TL").replace(" ", "-") or "TL"
+    pdf_bytes = st.session_state.get("generated_pdf_bytes")
+    pdf_name  = st.session_state.get("generated_pdf_name", "TraceLens_Report.pdf")
+
+    if pdf_bytes:
         st.download_button(
             label     = "⬇ DOWNLOAD CLASSIFIED REPORT (PDF)",
             data      = pdf_bytes,
-            file_name = f"TraceLens_{case_id}_{ts}.pdf",
+            file_name = pdf_name,
             mime      = "application/pdf",
         )
         st.success("Report ready for download.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style='text-align:center;padding:40px;'>
+            <p style='font-family:var(--font-mono);font-size:12px;color:#555;'>
+                No report generated yet. Go to Analyze page and click Generate Report.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)

@@ -139,14 +139,15 @@ def render():
         text-transform: uppercase;
         padding: 14px 36px;
         cursor: pointer;
-        text-decoration: none;
+        text-decoration: none !important;
         transition: all 0.3s;
         border: none;
         display: inline-block;
+        color: inherit !important;
     }
     .cta-primary {
         background: var(--blood);
-        color: #fff;
+        color: #FFD700 !important;
         border: 1px solid var(--blood-bright);
         box-shadow: 0 0 20px rgba(139,0,0,0.5);
     }
@@ -292,8 +293,8 @@ def render():
             <p class="hero-subtitle">TraceLens — Forensic Digital Evidence Analyzer</p>
             <div class="hero-classified">TOP SECRET // FORENSIC DIVISION // CASE ACTIVE</div>
             <div class="hero-cta">
-                <a class="cta-btn cta-primary" href="?page=Analyze">⚡ BEGIN ANALYSIS</a>
-                <a class="cta-btn cta-secondary" href="?page=Guide">📖 HOW IT WORKS</a>
+                <a class="cta-btn cta-primary" href="?page=Analyze"> BEGIN ANALYSIS</a>
+                <a class="cta-btn cta-secondary" href="?page=Guide"> HOW IT WORKS</a>
             </div>
         </div>
     </div>
@@ -383,7 +384,7 @@ def render():
 
     st.markdown("""
     <div style="text-align:center;padding:60px 40px;">
-        <p style="font-family:var(--font-type);font-size:16px;color:var(--text-dim);letter-spacing:2px;font-style:italic;">
+        <p style="font-family:var(--font-type);font-size:16px;color:#c8c8c8;letter-spacing:2px;font-style:italic;">
             "Every pixel tells a story. Every shadow hides the truth."
         </p>
         <div style="margin-top:32px;">

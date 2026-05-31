@@ -124,7 +124,7 @@ def render():
         <h1 style="font-family:var(--font-horror);font-size:56px;color:#fff;margin-bottom:12px;text-shadow:0 0 30px rgba(204,0,0,0.4);">
             The Investigators
         </h1>
-        <p style="font-family:var(--font-type);font-size:15px;color:var(--text-dim);letter-spacing:2px;max-width:600px;margin:0 auto;">
+        <p style="font-family:var(--font-type);font-size:15px;color:#c8c8c8;letter-spacing:2px;max-width:600px;margin:0 auto;">
             A team of three forensic imaging specialists dedicated to building tools that help uncover the truth hidden in digital evidence.
         </p>
     </div>
@@ -170,16 +170,16 @@ def render():
         <div class="mission-block">
             <p style="font-family:var(--font-type);font-size:16px;color:var(--text);line-height:1.9;">
                 TraceLens was built at the intersection of <span style="color:var(--gold)">Digital Image Processing</span>
-                and forensic science. Crime scene photography contains information invisible to the naked eye —
+                and forensic science. Crime scene photography contains information invisible to the naked eye
                 blood patterns obscured by darkness, faces hidden in low-resolution footage, impact points lost
                 in image compression. Our goal was to build a system that applies classical DIP algorithms
-                — histogram equalisation, HSV segmentation, Canny and Sobel edge detection, morphological
-                processing — in a way that mimics the pipeline a real forensic imaging analyst would use,
+                histogram equalisation, HSV segmentation, Canny and Sobel edge detection, morphological
+                processing in a way that mimics the pipeline a real forensic imaging analyst would use,
                 making evidence analysis accessible, reproducible, and documented.
             </p>
             <p style="font-family:var(--font-type);font-size:16px;color:var(--text);line-height:1.9;margin-top:20px;">
                 Every analysis generates a <span style="color:var(--gold)">classified forensic PDF report</span>
-                with chain-of-custody tracking, case metadata, and quantified findings — not just processed images,
+                with chain-of-custody tracking, case metadata, and quantified findings not just processed images,
                 but actionable investigative intelligence.
             </p>
         </div>
@@ -190,7 +190,7 @@ def render():
     st.markdown("""
         <!-- Tech stack -->
         <div style="text-align:center;padding:40px 0;">
-            <p style="font-family:var(--font-mono);font-size:10px;letter-spacing:4px;color:var(--blood-bright);margin-bottom:20px;">
+            <p style="font-family:var(--font-mono);font-size:13px;letter-spacing:4px;color:white;margin-bottom:20px;">
                 [ TECHNOLOGY STACK ]
             </p>
             <div>

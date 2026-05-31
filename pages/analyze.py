@@ -60,16 +60,16 @@ def render():
     /* Sidebar internals */
     section[data-testid="stSidebar"] .stMarkdown h4 {
         font-family: var(--font-mono, 'Courier New') !important;
-        font-size: 10px !important;
+        font-size: 15px !important;
         letter-spacing: 3px !important;
         color: #CC0000 !important;
         text-transform: uppercase !important;
-        margin: 16px 0 8px !important;
+        margin: 28px 0 10px !important;
     }
     section[data-testid="stSidebar"] label {
         font-family: var(--font-mono, 'Courier New') !important;
         font-size: 11px !important;
-        color: #FFD700 !important;
+        color:#ffffff !important;
         letter-spacing: 1px !important;
     }
 
@@ -99,7 +99,10 @@ def render():
     section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
         width: 100% !important;
         box-sizing: border-box !important;
-        padding: 12px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        margin-top: 0 !important;
     }
     /* Hide ALL text inside the dropzone — instructions, spans, small print */
     section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
@@ -157,7 +160,7 @@ def render():
         color: #000 !important;
     }
     section[data-testid="stSidebar"] .stCheckbox label {
-        color: #e0e0e0 !important;
+        color: #ffffff !important;
         font-size: 12px !important;
     }
     section[data-testid="stSidebar"] .stSelectbox label {
@@ -199,6 +202,30 @@ def render():
         text-transform: uppercase;
         margin-bottom: 8px;
     }
+    section[data-testid="stSidebar"] .stCheckbox p,
+    section[data-testid="stSidebar"] .stCheckbox span,
+    section[data-testid="stSidebar"] .stCheckbox div {
+        color: #d4d4d4  !important;
+                font-size: 14px !important;
+    }
+                
+    section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    section[data-testid="stSidebar"] [data-testid="stSlider"] label,
+    section[data-testid="stSidebar"] [data-testid="stSlider"] p,
+    section[data-testid="stSidebar"] .stSlider label,
+    section[data-testid="stSidebar"] .stSlider p {
+        font-size: 13px !important;
+        letter-spacing: 2px !important;
+    }
+                
     </style>
     """, unsafe_allow_html=True)
 
@@ -218,10 +245,10 @@ def render():
     # ── Sidebar ───────────────────────────────────────────────────────────────
     with st.sidebar:
         st.markdown("""
-        <div style="padding:20px 0 12px;">
-            <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:3px;
+        <div style="padding:4px 0 12px;">
+            <p style="font-family:'Courier New',monospace;font-size:19px;letter-spacing:3px;
                       color:#CC0000;text-transform:uppercase;margin:0;">
-                ▌ TRACELENS // CONTROL PANEL
+                 CONTROL PANEL
             </p>
             <div style="height:1px;background:linear-gradient(90deg,#CC0000,transparent);margin-top:8px;"></div>
         </div>
@@ -230,15 +257,30 @@ def render():
         # ── UPLOAD ────────────────────────────────────────────────────────────
         st.markdown("#### 📁 EVIDENCE UPLOAD")
         uploaded_file = st.file_uploader(
-            "Upload crime scene image",
+            "",
             type=["jpg", "jpeg", "png"],
             key="analyze_uploader"
         )
+
+        # ── Persist uploaded file across page navigations ─────────────────────
+        # If a new file was just uploaded, save its bytes to session state.
+        # If the uploader is empty (user navigated away and came back),
+        # restore from session state so the page re-renders with the last image.
+        if uploaded_file is not None:
+            st.session_state["_uploaded_file_bytes"] = uploaded_file.read()
+            st.session_state["_uploaded_file_name"]  = uploaded_file.name
+            uploaded_file.seek(0)  # reset pointer so it can be read again below
+        elif "_uploaded_file_bytes" in st.session_state:
+            import io
+            _buf      = io.BytesIO(st.session_state["_uploaded_file_bytes"])
+            _buf.name = st.session_state["_uploaded_file_name"]
+            uploaded_file = _buf
 
         # ── ENHANCEMENT ───────────────────────────────────────────────────────
         st.markdown("<hr style='border:1px solid #1a1a1a;margin:16px 0;'>", unsafe_allow_html=True)
         st.markdown("#### ⚙ ENHANCEMENT")
         contrast      = st.slider("Contrast",   0.5, 3.0, 1.0)
+
         brightness    = st.slider("Brightness", -100, 100, 0)
         apply_hist    = st.checkbox("Histogram Equalization")
         apply_sharpen = st.checkbox("Sharpen Image")
@@ -309,16 +351,16 @@ def render():
         <div style='text-align:center;margin-top:80px;padding:60px;'>
             <div style='font-size:64px;margin-bottom:20px;
                         filter:drop-shadow(0 0 20px rgba(139,0,0,0.5));'>🗂</div>
-            <p style='font-family:"Courier New",monospace;font-size:14px;letter-spacing:4px;
+            <p style='font-family:"Courier New",monospace;font-size:15px;letter-spacing:4px;
                       color:#CC0000;text-transform:uppercase;'>
                 AWAITING EVIDENCE UPLOAD
             </p>
-            <p style='font-family:"Courier New",monospace;font-size:12px;color:#444;margin-top:8px;'>
+            <p style='font-family:"Courier New",monospace;font-size:12px;color:white;margin-top:8px;'>
                 Upload a crime scene image from the sidebar panel to begin analysis
             </p>
-            <div style='border:1px dashed rgba(139,0,0,0.3);padding:20px 40px;
+            <div style='border:4px dashed rgba(139,0,0,0.3);padding:20px 40px;
                         display:inline-block;margin-top:24px;
-                        font-family:"Courier New",monospace;font-size:11px;color:#333;'>
+                        font-family:"Courier New",monospace;font-size:11px;color:white;'>
                 ACCEPTED FORMATS: JPG &nbsp;•&nbsp; JPEG &nbsp;•&nbsp; PNG
             </div>
         </div>
@@ -374,20 +416,30 @@ def render():
 
     cf1, cf2 = st.columns(2)
     with cf1:
-        case_number  = st.text_input("Case Number / ID",        placeholder="e.g. TL-2024-0042")
-        victim_name  = st.text_input("Victim / Subject Name",   placeholder="Full name or UNKNOWN")
-        suspect_name = st.text_input("Suspect Name (if known)", placeholder="Full name or UNKNOWN")
+        case_number  = st.text_input("Case Number / ID",        placeholder="e.g. TL-2024-0042",    value=st.session_state.get("_case_number", ""))
+        victim_name  = st.text_input("Victim / Subject Name",   placeholder="Full name or UNKNOWN", value=st.session_state.get("_victim_name", ""))
+        suspect_name = st.text_input("Suspect Name (if known)", placeholder="Full name or UNKNOWN", value=st.session_state.get("_suspect_name", ""))
     with cf2:
-        location      = st.text_input("Crime Scene Location",    placeholder="e.g. 14 Elm Street, Basement")
-        investigator  = st.text_input("Investigating Officer",   placeholder="Your name")
-        incident_date = st.text_input("Incident Date",           placeholder="e.g. 2024-11-15")
+        location      = st.text_input("Crime Scene Location",  placeholder="e.g. 14 Elm Street, Basement", value=st.session_state.get("_location", ""))
+        investigator  = st.text_input("Investigating Officer", placeholder="Your name",                    value=st.session_state.get("_investigator", ""))
+        incident_date = st.text_input("Incident Date",         placeholder="e.g. 2024-11-15",              value=st.session_state.get("_incident_date", ""))
 
     scene_description = st.text_area(
         "Crime Scene Description",
         placeholder="Describe what is visible in the scene, known sequence of events, relevant context...",
-        height=100
+        height=100,
+        value=st.session_state.get("_scene_description", "")
     )
     st.markdown("</div>", unsafe_allow_html=True)
+
+    # Persist case form fields so they survive navigation
+    st.session_state["_case_number"]       = case_number
+    st.session_state["_victim_name"]       = victim_name
+    st.session_state["_suspect_name"]      = suspect_name
+    st.session_state["_location"]          = location
+    st.session_state["_investigator"]      = investigator
+    st.session_state["_incident_date"]     = incident_date
+    st.session_state["_scene_description"] = scene_description
 
     st.session_state["case_info"] = {
         "case_number":       case_number,
@@ -600,13 +652,8 @@ def render():
                 mask_cv            = mask_cv,
                 case_info          = st.session_state.get("case_info", {}),
             )
-        ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
-        pdf_name = f"TraceLens_CaseReport_{ts}.pdf"
-        st.download_button(
-            label     = "⬇ DOWNLOAD CLASSIFIED REPORT (PDF)",
-            data      = pdf_bytes,
-            file_name = pdf_name,
-            mime      = "application/pdf",
-            key       = "download_report_btn",
-        )
-        st.success(f"Report compiled — {pdf_name}")
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        st.session_state["generated_pdf_bytes"] = pdf_bytes
+        st.session_state["generated_pdf_name"]  = f"TraceLens_CaseReport_{ts}.pdf"
+        st.session_state["current_page"]        = "Report"
+        st.rerun()

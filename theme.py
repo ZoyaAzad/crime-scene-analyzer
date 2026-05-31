@@ -196,48 +196,6 @@ section.main > div { padding-top: 0 !important; }
     animation-delay: inherit;
 }
 
-/* ── Caution tape corners ────────────────────────────────── */
-@keyframes tape-sway {
-    0%,100% { transform: rotate(-45deg) translateX(0); }
-    50%     { transform: rotate(-45deg) translateX(4px); }
-}
-.caution-corner {
-    position: fixed;
-    z-index: 8000;
-    pointer-events: none;
-    overflow: hidden;
-}
-.caution-corner.tl { top:64px; left:0; width:180px; height:180px; }
-.caution-corner.br { bottom:0; right:0; width:180px; height:180px; }
-.caution-tape {
-    background: repeating-linear-gradient(
-        -45deg,
-        #FFD700 0px, #FFD700 20px,
-        #1a1a1a 20px, #1a1a1a 40px
-    );
-    font-family: var(--font-head);
-    font-size: 7px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    opacity: 0.75;
-    animation: tape-sway 3s ease-in-out infinite;
-}
-.caution-corner.tl .caution-tape {
-    width: 300px; height: 28px;
-    transform: rotate(-45deg) translate(-70px, 30px);
-    transform-origin: center center;
-}
-.caution-corner.br .caution-tape {
-    width: 300px; height: 28px;
-    transform: rotate(-45deg) translate(-30px, 80px);
-    transform-origin: center center;
-}
-
 /* ── Sidebar ─────────────────────────────────────────────── */
 section[data-testid="stSidebar"] {
     background: var(--bg3) !important;
@@ -288,7 +246,7 @@ section[data-testid="stSidebar"] * {
     box-shadow: 0 0 10px rgba(139,0,0,0.3) !important;
 }
 div[data-testid="stFileUploader"] {
-    border: 1px dashed var(--blood) !important;
+    border:  none !important;
     background: rgba(139,0,0,0.05) !important;
     border-radius: 0 !important;
 }
@@ -446,8 +404,6 @@ DRIP_HTML = """
 <div class="blood-bar" id="bloodBar"></div>
 <div class="scanlines"></div>
 <div class="bulb-widget">💡</div>
-<div class="caution-corner tl"><div class="caution-tape">⚠ DO NOT CROSS • CRIME SCENE • WARNING • DO NOT CROSS • CRIME SCENE ⚠</div></div>
-<div class="caution-corner br"><div class="caution-tape">⚠ DO NOT CROSS • CRIME SCENE • WARNING • DO NOT CROSS • CRIME SCENE ⚠</div></div>
 <script>
 (function(){
     const bar = document.getElementById('bloodBar');
@@ -521,16 +477,20 @@ def inject_theme(active_page: str = "Home"):
 def tape_divider():
     st.markdown("<div class='tape-divider'></div>", unsafe_allow_html=True)
 
-
 def section_header(icon: str, title: str, subtitle: str = ""):
-    sub = f"<p style='font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:2px;margin-top:4px;text-transform:uppercase;'>{subtitle}</p>" if subtitle else ""
-    st.markdown(f"""
-    <div style='margin:28px 0 16px 0;'>
-        <div style='display:flex;align-items:center;gap:12px;'>
-            <span style='font-size:22px'>{icon}</span>
-            <h3 style='margin:0;font-size:18px;'>{title}</h3>
-        </div>
-        {sub}
-        <div style='height:2px;background:linear-gradient(90deg,var(--blood),transparent);margin-top:8px;'></div>
-    </div>
-    """, unsafe_allow_html=True)
+    sub = (
+        f"<p style='font-family:var(--font-mono);font-size:12px;color:var(--text-dim);"
+        f"letter-spacing:2px;margin-top:4px;text-transform:uppercase;'>{subtitle}</p>"
+        if subtitle else ""
+    )
+    html = (
+        f"<div style='margin:28px 0 16px 0;'>"
+        f"<div style='display:flex;align-items:center;gap:12px;'>"
+        f"<span style='font-size:22px'>{icon}</span>"
+        f"<h3 style='margin:0;font-size:18px;'>{title}</h3>"
+        f"</div>"
+        f"{sub}"
+        f"<div style='height:2px;background:linear-gradient(90deg,var(--blood),transparent);margin-top:8px;'></div>"
+        f"</div>"
+    )
+    st.markdown(html, unsafe_allow_html=True)

@@ -1,18 +1,29 @@
 import streamlit as st
-
-st.markdown("""
-<style>
-/* Hide Streamlit's auto-generated pages navigation */
-[data-testid="stSidebarNav"] { display: none !important; }
-</style>
-""", unsafe_allow_html=True)
-
+ 
 st.set_page_config(
     page_title="TraceLens — Forensic Evidence Analyzer",
     layout="wide",
     page_icon="🔍",
     initial_sidebar_state="collapsed",
 )
+
+st.markdown("""
+<style>
+/* Hide Streamlit's auto-generated pages navigation */
+[data-testid="stSidebarNav"] { display: none !important; }
+            
+[data-testid="stSidebarCollapsedControl"],
+button[data-testid="collapsedControl"],
+[data-testid="collapsedControl"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+span[data-testid="stIconMaterial"] {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
