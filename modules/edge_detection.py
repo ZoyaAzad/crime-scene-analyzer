@@ -7,7 +7,7 @@ def canny_edges(image, t1, t2):
     gray  = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, t1, t2)
     return edges
-
+#canny edge converts the image to grascale aur phir threshold ki basis pe edge detect karta hai. Low threshold (more edges-noisy) and high threshold values(less edges-clean)
 
 # ── 2. Sobel Edge Detection ───────────────────────────────────────────────────
 def sobel_edges(image):
@@ -36,11 +36,11 @@ def sobel_edges(image):
     result[:, :, 2] = abs_x   # Red  = vertical edges (X gradient)
     result[:, :, 0] = abs_y   # Blue = horizontal edges (Y gradient)
     result[:, :, 1] = combined // 2  # Green = combined (dim)
-
+    #sobel edge detection directional gradients detect karta hai, horizontal aur vertical edges ko alag alag show karta hai. Red channel vertical edges ko show karega, blue channel horizontal edges ko, aur green channel dono ka combined magnitude dikhayega. Isse user ko pata chalega ke image mein kaha kaha pe force ya impact hua hai based on edge directions.
     return result, abs_x, abs_y, combined
 
 
-# ── 3. Contour Detection + Bullet/Impact Hole Detection ──────────────────────
+# ── 3. Contour Detection 
 def detect_contours(image, min_area):
     """
     Detects object contours AND flags near-circular ones as potential
@@ -97,3 +97,4 @@ def threshold_image(image, thresh_value):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, thresh_value, 255, cv2.THRESH_BINARY)
     return thresh
+#purpose of 

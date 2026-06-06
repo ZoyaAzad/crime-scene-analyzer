@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def segment_color(image, lower, upper):
+def segment_color(image, lower, upper, use_builtin_ranges=True):
     """
     Multi-range blood detection that catches:
     - Fresh bright red blood
@@ -13,10 +13,12 @@ def segment_color(image, lower, upper):
     Uses 3 HSV ranges simultaneously + user range,
     with conservative exclusions that don't eat real blood.
     """
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    #original image ko hsv mein convert karta hai because hsv makes colour filtering easier than RGB
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)  
     h, w = image.shape[:2]
 
     # ── Range 1: User-defined (from sliders) ─────────────────────────────
+    #cv2.inrange aik binary mask banata hai jisme pixels jo range k andar ate hain unko white(255) aur jo pixels range k bahir ate hain ynk black(0)  show karega 
     mask_user = cv2.inRange(hsv, lower, upper)
 
     # ── Range 2: Fresh/bright red blood ──────────────────────────────────
@@ -51,9 +53,12 @@ def segment_color(image, lower, upper):
     mask_dark   = cv2.bitwise_or(mask_dark, mask_dark2)
 
     # ── Combine all ranges ────────────────────────────────────────────────
-    combined = cv2.bitwise_or(mask_user, mask_fresh)
-    combined = cv2.bitwise_or(combined,  mask_dried)
-    combined = cv2.bitwise_or(combined,  mask_dark)
+    if use_builtin_ranges:
+        combined = cv2.bitwise_or(mask_user, mask_fresh)
+        combined = cv2.bitwise_or(combined,  mask_dried)
+        combined = cv2.bitwise_or(combined,  mask_dark)
+    else:
+        combined = mask_user  # sliders only
 
     # ── Exclusions — CONSERVATIVE, don't remove dark pixels ──────────────
 
@@ -114,19 +119,21 @@ def segment_color(image, lower, upper):
     # ── Draw overlay ──────────────────────────────────────────────────────
     result  = image.copy()
     overlay = result.copy()
-    cv2.drawContours(overlay, significant, -1, (0, 0, 160), -1)
-    result = cv2.addWeighted(overlay, 0.35, result, 0.65, 0)
-    cv2.drawContours(result, significant, -1, (0, 0, 255), 2)
+    cv2.drawContours(overlay, significant, -1, (0, 0, 160), -1) # this is the BGR color for the overlay (dark red), jahan jahan stain detect hua hai wahan wahan ye color apply hoga to show user where the stain is 
+    result = cv2.addWeighted(overlay, 0.35, result, 0.65, 0) # ye Final = 35% overlay + 65% original do images ko combine karega to create a transparent overlay affect to user ko sare stain areas nazar aenge aur originl image bhi thori bohat visible rahe gi 
+    cv2.drawContours(result, significant, -1, (0, 0, 255), 2) #ye uper wale areas jo detect huye hain un k around red box draw karega to highlight the status with a red border
 
-    for i, c in enumerate(significant):
-        x, y, bw, bh = cv2.boundingRect(c)
+    for i, c in enumerate(significant): #
+        x, y, bw, bh = cv2.boundingRect(c) 
         area = cv2.contourArea(c)
         cv2.putText(result, f"S{i+1} {int(area)}px",
                     (x, max(y - 6, 10)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
-
+        
+    #This loop iterates over all detected stain contours and overlays labels on the output image, showing each region’s index and pixel area for better interpretability of the analysis results.    
     pixel_count = cv2.countNonZero(clean_mask)
     total       = h * w
     coverage    = (pixel_count / total) * 100
+
 
     return result, clean_mask, len(significant), coverage

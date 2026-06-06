@@ -9,6 +9,10 @@ from modules.color_segment   import segment_color
 from modules.edge_detection  import canny_edges, sobel_edges, detect_contours, threshold_image
 from modules.enhancement     import histogram_equalization, adjust_contrast_brightness, sharpen_image
 from modules.face_detect     import detect_faces
+from modules.bloodspatter      import analyze_blood_spatter
+from modules.weapon_proximity  import analyze_weapon_proximity
+from modules.injury_localization import localize_injuries
+from modules.body_pose         import analyze_body_pose
 
 
 def render():
@@ -308,6 +312,7 @@ def render():
         st.markdown("<hr style='border:1px solid #1a1a1a;margin:16px 0;'>", unsafe_allow_html=True)
         st.markdown("#### 🩸 STAIN DETECTION")
         enable_color = st.checkbox("Enable Color Detection")
+        slider_only  = st.checkbox("Slider Range Only") 
 
         col_a, col_b, col_c = st.columns(3)
         with col_a:
@@ -383,6 +388,16 @@ def render():
     contour_count_val  = None
     contour_areas_val  = []
     mask_cv            = None
+    spatter_results  = None
+    spatter_cv       = None
+    weapon_results   = None
+    weapon_cv        = None
+    injury_results   = None
+    injury_cv        = None
+    pose_results     = None
+    pose_cv          = None
+ 
+
 
     # Evidence header bar
     st.markdown(f"""
@@ -518,10 +533,11 @@ def render():
 
     # ── MODULE 4: Colour segmentation ────────────────────────────────────────
     if enable_color:
-        lower     = np.array([h_min, s_min, v_min])
-        upper     = np.array([h_max, s_max, v_max])
+        lower = np.array([h_min, s_min, v_min])
+        upper = np.array([h_max, s_max, v_max])
         processed, mask_cv, stain_count, coverage = segment_color(
-            clean_for_edges.copy(), lower, upper
+            processed.copy(), lower, upper,
+            use_builtin_ranges=not slider_only
         )
         stain_coverage_val = coverage
         stain_count_val    = stain_count
@@ -561,8 +577,78 @@ def render():
     if enable_color and apply_face and mask_cv is not None and face_details_list:
         stain_c, _ = cv2.findContours(mask_cv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cv2.drawContours(processed, stain_c, -1, (0, 0, 255), 2)
-
-    # Save to session for report page
+    
+    if enable_color and mask_cv is not None:
+        spatter_cv, spatter_results = analyze_blood_spatter(image_cv, mask_cv)
+        if spatter_results:
+            findings.append(
+                f"Blood spatter pattern: {spatter_results['pattern_type']} "
+                f"(confidence {spatter_results['pattern_confidence']:.0%})"
+            )
+            findings.append(
+                f"  Origin direction: {spatter_results['origin_direction']} | "
+                f"Velocity: {spatter_results['velocity']} | "
+                f"Serration index: {spatter_results['edge_serration_index']}"
+            )
+ 
+    # ── FORENSIC MODULE 2: Injury Localization ────────────────────────────
+    if enable_color and mask_cv is not None:
+        injury_cv, injury_results = localize_injuries(image_cv, mask_cv, face_details_list if face_details_list else None)
+        if injury_results:
+            findings.append(
+                f"Injury localization: {injury_results['overall_severity']} severity — "
+                f"{injury_results['conclusion']}"
+            )
+            for inj in injury_results.get("injury_summary", [])[:3]:
+                findings.append(
+                    f"  {inj['region']}: {inj['severity']} "
+                    f"(confidence {inj['confidence']:.0%}, "
+                    f"{inj['stain_count']} stain region(s))"
+                )
+ 
+    # ── FORENSIC MODULE 3: Weapon-Hand Proximity ──────────────────────────
+    if face_count > 0:
+        weapon_cv, weapon_results = analyze_weapon_proximity(
+            image_cv, face_details_list, mask_cv
+        )
+        if weapon_results and weapon_results.get("weapon_count", 0) > 0:
+            findings.append(
+                f"Weapon proximity: {weapon_results['weapon_count']} object(s) detected — "
+                f"{weapon_results['conclusion']}"
+            )
+            for item in weapon_results.get("items", []):
+                findings.append(
+                    f"  Object #{item['weapon_id']}: {item['proximity_class']} "
+                    f"({int(item['distance_px'])}px from subject) — "
+                    f"{item['note'][:80]}"
+                )
+ 
+    # ── FORENSIC MODULE 4: Body Pose Analysis ─────────────────────────────
+    if face_count > 0:
+        pose_cv, pose_results = analyze_body_pose(
+            image_cv, face_details_list, mask_cv
+        )
+        if pose_results:
+            findings.append(
+                f"Body posture: {pose_results['posture']} "
+                f"(confidence {pose_results['posture_confidence']:.0%})"
+            )
+            findings.append(
+                f"  Stain consistency: {pose_results['stain_posture_consistency']} | "
+                f"Scene consistency score: {pose_results['scene_consistency_score']:.1f}/100"
+            )
+            for flag in pose_results.get("staging_flags", []):
+                findings.append(f"  ⚠ STAGING FLAG: {flag}")
+ 
+    # Save forensic results to session state
+    st.session_state["spatter_results"]  = spatter_results
+    st.session_state["spatter_cv"]       = spatter_cv
+    st.session_state["weapon_results"]   = weapon_results
+    st.session_state["weapon_cv"]        = weapon_cv
+    st.session_state["injury_results"]   = injury_results
+    st.session_state["injury_cv"]        = injury_cv
+    st.session_state["pose_results"]     = pose_results
+    st.session_state["pose_cv"]          = pose_cv
     st.session_state["last_findings"]       = findings
     st.session_state["last_techniques"]     = techniques_applied
     st.session_state["last_face_details"]   = face_details_list
@@ -651,6 +737,14 @@ def render():
                 techniques_applied = techniques_applied,
                 mask_cv            = mask_cv,
                 case_info          = st.session_state.get("case_info", {}),
+                spatter_results    = st.session_state.get("spatter_results"),
+                weapon_results     = st.session_state.get("weapon_results"),
+                injury_results     = st.session_state.get("injury_results"),
+                pose_results       = st.session_state.get("pose_results"),
+                spatter_cv         = st.session_state.get("spatter_cv"),
+                weapon_cv          = st.session_state.get("weapon_cv"),
+                injury_cv          = st.session_state.get("injury_cv"),
+                pose_cv            = st.session_state.get("pose_cv"),
             )
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state["generated_pdf_bytes"] = pdf_bytes
