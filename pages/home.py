@@ -9,14 +9,14 @@ def render():
     <style>
     /* ── Hero ────────────────────────────────────────── */
     .hero {
-        min-height: 88vh;
+        min-height: 56vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         position: relative;
         overflow: hidden;
-        padding: 60px 20px;
+        padding: 60px 20px 0;
     }
 
     /* Cracked mirror / blood splatter background */
@@ -117,7 +117,7 @@ def render():
         letter-spacing: 5px;
         padding: 6px 20px;
         text-transform: uppercase;
-        margin-bottom: 48px;
+        margin-bottom: 0;
         opacity: 0;
         animation: fadeUp 1s 1s forwards;
         box-shadow: 0 0 20px rgba(204,0,0,0.3), inset 0 0 20px rgba(204,0,0,0.05);
@@ -167,6 +167,16 @@ def render():
         transform: translateY(-2px);
     }
 
+
+    /* Pull CTA buttons up into the hero gap */
+    .hero-btn-row {
+        margin-top: 32px;
+        margin-bottom: 0;
+        padding-bottom: 20px;
+        position: relative;
+        z-index: 10;
+    }
+    
     /* ── Stats row ───────────────────────────────────── */
     .stats-row {
         display: grid;
@@ -296,7 +306,8 @@ def render():
     </div>
     """, unsafe_allow_html=True)
 
-    # Hero CTA buttons using Streamlit navigation
+    # Hero CTA buttons — wrapped in hero-btn-row to pull them up into the hero
+    st.markdown('<div class="hero-btn-row">', unsafe_allow_html=True)
     col1, col2, col3, col4, col5 = st.columns([1, 1.2, 0.3, 1.2, 1])
     with col2:
         if st.button("⚡ BEGIN ANALYSIS", key="hero_analyze", use_container_width=True):
@@ -308,6 +319,7 @@ def render():
             st.session_state.current_page = "Guide"
             st.session_state["sidebar_expanded"] = False
             st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("""
     <!-- Ticker -->

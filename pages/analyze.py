@@ -687,6 +687,8 @@ def render():
                     unsafe_allow_html=True)
         st.image(mask_cv, use_container_width=True, clamp=True)
 
+    
+
     # ── Findings log ──────────────────────────────────────────────────────────
     st.markdown("<hr style='border:1px solid #1a1a1a;margin:32px 0;'>",
                 unsafe_allow_html=True)
